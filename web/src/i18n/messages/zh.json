@@ -122,8 +122,8 @@
       "authenticate": {
         "label": "身份验证"
       },
-      "codingAgentIncognito": {
-        "tooltip": "无痕模式下无法使用编码智能体"
+      "blockedInChat": {
+        "tooltip": "{reason, select, incognito {无痕模式下无法使用{tool}} anonymous {登录后才能使用{tool}} multiModel {比较模型时无法使用{tool}} other {此聊天中无法使用{tool}}}"
       },
       "configure": {
         "tooltip": "配置"
@@ -776,6 +776,9 @@
       },
       "codingAgent": {
         "label": "编码智能体"
+      },
+      "sandbox": {
+        "label": "沙盒"
       }
     },
     "toolsPopover": {
@@ -851,6 +854,9 @@
         },
         "webSearch": {
           "description": "在网络上搜索最新信息。"
+        },
+        "sandbox": {
+          "description": "在私有 Linux 沙盒中运行 shell 命令并编辑文件。"
         }
       }
     },
@@ -2459,6 +2465,10 @@
         "webSearch": {
           "description": "搜索网络以获取实时信息和最新结果。",
           "title": "网络搜索"
+        },
+        "sandbox": {
+          "description": "在私有 Linux 沙盒中运行 shell 命令并编辑文件。",
+          "title": "沙盒"
         }
       }
     },
@@ -11286,6 +11296,10 @@
         "webSearch": {
           "description": "在网络上搜索实时信息和最新结果。",
           "title": "网络搜索"
+        },
+        "sandbox": {
+          "description": "在私有 Linux 沙盒中运行 shell 命令并编辑文件。",
+          "title": "沙盒"
         }
       },
       "advanced": {
@@ -13102,6 +13116,12 @@
           },
           "waitingForApproval": {
             "label": "正在等待你的批准"
+          },
+          "runningCommand": {
+            "label": "正在运行命令"
+          },
+          "editingFiles": {
+            "label": "正在编辑文件"
           }
         },
         "internalSearch": {
@@ -13231,11 +13251,54 @@
           "researchAgent": "研究智能体",
           "thinking": "思考",
           "tool": "工具",
-          "webSearch": "网页搜索"
+          "webSearch": "网页搜索",
+          "terminal": "终端",
+          "applyPatch": "应用补丁"
         },
         "webSearch": {
           "searching": {
             "status": "正在搜索网页"
+          }
+        },
+        "sandbox": {
+          "exec": {
+            "status": "{phase, select, running {正在运行命令} started {已启动命令} failed {命令失败} done {已运行命令} other {已运行命令}}",
+            "workdir": {
+              "label": "位于 {workdir}"
+            }
+          },
+          "stdin": {
+            "status": "{kind, select, send {{phase, select, running {正在向会话 {sessionId} 发送输入} failed {无法向会话 {sessionId} 发送输入} done {已向会话 {sessionId} 发送输入} other {已向会话 {sessionId} 发送输入}}} check {{phase, select, running {正在检查会话 {sessionId}} failed {无法检查会话 {sessionId}} done {已检查会话 {sessionId}} other {已检查会话 {sessionId}}}} other {会话 {sessionId}}}"
+          },
+          "output": {
+            "title": "输出"
+          },
+          "exitCode": {
+            "label": "退出代码 {exitCode}"
+          },
+          "completion": {
+            "label": "{completion, select, signaled {已被信号停止} canceled {已取消} deadline_exceeded {已达到时间限制而停止} other {已结束}}"
+          },
+          "stillRunning": {
+            "label": "仍在运行（会话 {sessionId}）"
+          },
+          "truncated": {
+            "label": "输出已截断"
+          },
+          "noOutput": {
+            "text": "无输出"
+          },
+          "patch": {
+            "edited": {
+              "status": "{count, plural, one {已编辑 # 个文件} other {已编辑 # 个文件}}"
+            },
+            "failed": {
+              "status": "补丁失败"
+            },
+            "title": "补丁"
+          },
+          "stopped": {
+            "status": "已停止"
           }
         }
       },

@@ -888,6 +888,9 @@ class ChatTurnSetup(BaseModel):
     persona: PersonaPromptConfig
     base_system_prompt: str
     tool_configuration: PersonaToolConfiguration
+    # The built-in tools (by in-code ID) that the turn drops, each with the
+    # message that rejects forcing it (execution.unavailable_turn_tools).
+    unavailable_tools: dict[str, str]
     research_tool_id: int | None
     checkpoint: CompactionCheckpoint | None
     # Child-result delivery has no new user message.

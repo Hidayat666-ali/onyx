@@ -151,6 +151,11 @@ receives); see [[code-execution]]. A tool that must not run twice sets
 that a lost execution owner left running (`agents/tools.py:AgentTool`).
 `inner_tools` lists the tools that run inside a tool's calls, such as the
 functions of `execute_code`; `chat/prompt_utils.py:callable_tools` reads it.
+`end_run` ends state that a tool keeps for one run, such as the sandbox turn:
+`chat/agent.py:ChatAgent` calls each configured tool's `end_run` once from
+`Agent.on_release`, which `agents/runtime.py:Run` calls after each finish or
+suspension, once the run's work (its tool threads and its children's work)
+has drained.
 
 When the run completes normally, every call gets a result: `ToolBatch` answers
 an unknown tool name, malformed arguments or truncated arguments with an error
@@ -199,9 +204,16 @@ delivers follow-up responses, the request sets `accepts_follow_ups`, as the web 
 the turn has one model.
 Mobile, the CLI and other API clients omit the flag. Incognito chats and one-shot callers
 (`chat/process_message.py:run_chat_turn`, used by Slack, evals and the non-streaming API)
-omit these controls. In incognito, chat also excludes the coding agent from tool configuration
-(`chat/execution.py:create_chat_agent`), and preparation rejects deep research before it saves
-the user message (`chat/process_message.py:prepare_chat_turn`). These controls have no
+omit these controls. `chat/execution.py:unavailable_turn_tools` names the built-in tools
+that a turn drops from its tool configuration (`ChatTurnSetup.unavailable_tools`, applied in
+`chat/execution.py:create_chat_agent`): the coding agent and the sandbox tools in incognito
+(incognito cleanup does not reach the sandbox's session files), the sandbox tools for
+anonymous users (one sandbox serves one user), and the sandbox tools in a multi-model turn
+(two models must not edit one session directory). A continued response is multi-model when
+its turn saved several responses together (`db/chat.py:count_turn_responses`). Preparation
+rejects a request that forces such a tool, and
+deep research in incognito, before it saves the user message
+(`chat/process_message.py:prepare_chat_turn`). These controls have no
 catalog rows or persona switches. `chat/agent.py:chat_subagent_factory` builds children
 with `build_chat_agent`, the same builder that restores saved children.
 Each child builds its own controls and conversation state.

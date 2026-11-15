@@ -69,6 +69,12 @@ EXPECTED_TOOLS = {
         in_code_tool_id="CodingAgentTool",
         user_id=None,
     ),
+    "ExecCommandTool": ToolSeedingExpectedResult(
+        name="exec_command",
+        display_name="Sandbox",
+        in_code_tool_id="ExecCommandTool",
+        user_id=None,
+    ),
 }
 
 
@@ -109,8 +115,8 @@ def test_tool_seeding_migration() -> None:
         )
         tools = result.fetchall()
 
-        assert len(tools) == 11, (
-            f"Should have created exactly 11 builtin tools, got {len(tools)}"
+        assert len(tools) == 12, (
+            f"Should have created exactly 12 builtin tools, got {len(tools)}"
         )
 
         def validate_tool(expected: ToolSeedingExpectedResult) -> None:
@@ -154,3 +160,19 @@ def test_tool_seeding_migration() -> None:
         validate_tool(EXPECTED_TOOLS["MemoryTool"])
 
         validate_tool(EXPECTED_TOOLS["CodingAgentTool"])
+
+        validate_tool(EXPECTED_TOOLS["ExecCommandTool"])
+
+        # The default agent (persona 0) offers the Sandbox.
+        sandbox_on_default_agent = db_session.execute(
+            text("""
+                SELECT 1
+                FROM persona__tool
+                JOIN tool ON tool.id = persona__tool.tool_id
+                WHERE persona__tool.persona_id = 0
+                  AND tool.in_code_tool_id = 'ExecCommandTool'
+                """)
+        ).scalar()
+        assert sandbox_on_default_agent == 1, (
+            "The default agent should have the Sandbox"
+        )

@@ -6,6 +6,7 @@ import { ReadableStream } from "node:stream/web";
 import {
   applyChatPluginIntent,
   chatPluginIntentLoadState,
+  chatToolBlock,
   chatPluginsForAgent,
   enabledChatToolIds,
   effectiveChatPreferredToolId,
@@ -21,6 +22,10 @@ import { buildMemberPlugins } from "@/lib/plugins/member";
 import { MCPServerStatus, type MCPServer } from "@/lib/mcp/types";
 import { useToolConfiguration } from "@/lib/tools/hooks";
 import type { ToolSnapshot } from "@/lib/tools/types";
+import {
+  CODING_AGENT_TOOL_ID,
+  EXEC_COMMAND_TOOL_ID,
+} from "@/lib/tools/constants";
 
 let mockChatId: string | null = "chat-a";
 let mockAgentId: number | null = null;
@@ -281,6 +286,56 @@ async function savedOn(chatSessionId: string): Promise<void> {
     ).toBeTruthy()
   );
 }
+
+describe("tools the backend drops from a turn", () => {
+  const sandbox = tool(30, { in_code_tool_id: EXEC_COMMAND_TOOL_ID });
+  const codingAgent = tool(31, { in_code_tool_id: CODING_AGENT_TOOL_ID });
+  const agent = { id: 5, tools: [sandbox, codingAgent] };
+  const normalChat = { incognito: false, anonymous: false, multiModel: false };
+
+  test.each(["incognito", "anonymous", "multiModel"] as const)(
+    "%s chats block the sandbox and drop its pin",
+    (condition) => {
+      const conditions = { ...normalChat, [condition]: true };
+      expect(chatToolBlock(sandbox, conditions)).toBe(condition);
+      expect(
+        effectiveChatPreferredToolId({
+          requestedToolId: sandbox.id,
+          agent,
+          plugins: [],
+          conditions,
+        })
+      ).toBeNull();
+    }
+  );
+
+  test("only incognito blocks the coding agent", () => {
+    expect(chatToolBlock(codingAgent, { ...normalChat, incognito: true })).toBe(
+      "incognito"
+    );
+    expect(
+      chatToolBlock(codingAgent, {
+        ...normalChat,
+        anonymous: true,
+        multiModel: true,
+      })
+    ).toBeNull();
+  });
+
+  test("a normal chat keeps both tools", () => {
+    for (const blockable of [sandbox, codingAgent]) {
+      expect(chatToolBlock(blockable, normalChat)).toBeNull();
+      expect(
+        effectiveChatPreferredToolId({
+          requestedToolId: blockable.id,
+          agent,
+          plugins: [],
+          conditions: normalChat,
+        })
+      ).toBe(blockable.id);
+    }
+  });
+});
 
 test("groups only attached tools and preserves custom-agent access outside default chat", () => {
   expect(

@@ -10,6 +10,7 @@ import {
   SvgServer,
   SvgTerminal,
 } from "@opal/icons";
+import { EXEC_COMMAND_TOOL_ID } from "@/lib/tools/constants";
 
 // Helper functions to identify specific tools
 const isSearchTool = (tool: ToolSnapshot): boolean => {
@@ -76,6 +77,7 @@ export function getIconForAction(
   if (isOpenUrlTool(action)) return SvgLink;
   if (isCodeInterpreterTool(action)) return SvgTerminal;
   if (isCodingAgentTool(action)) return SvgCpu;
+  if (action.in_code_tool_id === EXEC_COMMAND_TOOL_ID) return SvgTerminal;
   return SvgCpu;
 }
 

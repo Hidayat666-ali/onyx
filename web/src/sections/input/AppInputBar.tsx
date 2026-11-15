@@ -452,7 +452,11 @@ const AppInputBar = React.memo(
       requestedToolId: toolConfiguration.preferredToolId,
       agent: activeAgent,
       plugins: memberPlugins ?? [],
-      incognito: incognitoEnabled,
+      conditions: {
+        incognito: incognitoEnabled,
+        anonymous: user?.is_anonymous_user ?? false,
+        multiModel: isMultiModelActive ?? false,
+      },
     });
     const { isLoading: isLoadingProjects } = useProjects();
     const activeProject = useActiveProject();
@@ -854,6 +858,7 @@ const AppInputBar = React.memo(
                 key={activeAgent.id}
                 agent={activeAgent}
                 toolConfiguration={toolConfiguration}
+                multiModel={isMultiModelActive ?? false}
                 disabled={disabled}
               />
             )}

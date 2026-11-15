@@ -79,7 +79,7 @@ from onyx.server.query_and_chat.streaming_models import (
     ToolApprovalResolved,
 )
 from onyx.server.settings.store import load_settings
-from onyx.tools.constants import CODING_AGENT_TOOL_ID
+from onyx.tools.constants import CODING_AGENT_TOOL_ID, SANDBOX_TOOL_ID
 from onyx.tools.interface import Tool
 from onyx.tools.models import ChatToolSelection
 from onyx.tools.tool_constructor import (
@@ -914,6 +914,40 @@ def host_agent_work(
                 logger.exception("Agent host control failed; will retry")
 
 
+def unavailable_turn_tools(
+    *, anonymous: bool, incognito: bool, multi_model: bool
+) -> dict[str, str]:
+    """The built-in tools (by in-code ID) that a turn does not offer, each with
+    the message that rejects a request to force it. `multi_model`: the turn
+    has several responses, saved or to save."""
+    unavailable: dict[str, str] = {}
+    if incognito:
+        # Incognito chats have no child agents, and the coding agent runs as
+        # a child.
+        unavailable[CODING_AGENT_TOOL_ID] = (
+            "The Coding Agent is not available in incognito. Start a normal chat "
+            "to use it."
+        )
+    if anonymous:
+        # One sandbox serves one user; anonymous visitors share one user.
+        unavailable[SANDBOX_TOOL_ID] = (
+            "The Sandbox is not available to anonymous users. Sign in to use it."
+        )
+    elif incognito:
+        # The sandbox keeps session files outside the file store, which
+        # incognito cleanup does not reach.
+        unavailable[SANDBOX_TOOL_ID] = (
+            "The Sandbox is not available in incognito. Start a normal chat to use it."
+        )
+    elif multi_model:
+        # Two models must not change one session directory at once.
+        unavailable[SANDBOX_TOOL_ID] = (
+            "The Sandbox is not available when several models answer. Pick one "
+            "model to use it."
+        )
+    return unavailable
+
+
 def create_chat_agent(
     setup: ChatTurnSetup,
     user: User,
@@ -927,14 +961,13 @@ def create_chat_agent(
     with cancellation_scope(cancellation):
         cancellation.check()
         tool_configuration = setup.tool_configuration
-        if setup.incognito_record_mode is not None:
-            # Incognito chats have no child agents, and these features run as children.
+        if setup.unavailable_tools:
             tool_configuration = tool_configuration.model_copy(
                 update={
                     "tools": [
                         tool
                         for tool in tool_configuration.tools
-                        if tool.in_code_tool_id != CODING_AGENT_TOOL_ID
+                        if tool.in_code_tool_id not in setup.unavailable_tools
                     ]
                 }
             )

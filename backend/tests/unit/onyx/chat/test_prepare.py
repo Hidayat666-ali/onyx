@@ -281,6 +281,9 @@ def _mock_chat_preparation(
     )
     monkeypatch.setattr("onyx.chat.process_message.get_tools", lambda *_args: [])
     monkeypatch.setattr(
+        "onyx.chat.process_message.count_turn_responses", lambda *_args: 1
+    )
+    monkeypatch.setattr(
         "onyx.chat.process_message.find_summary_for_branch",
         lambda *_args, **_kwargs: None,
     )

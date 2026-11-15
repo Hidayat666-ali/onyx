@@ -122,8 +122,8 @@
       "authenticate": {
         "label": "S'authentifier"
       },
-      "codingAgentIncognito": {
-        "tooltip": "L'agent de code n'est pas disponible en mode incognito"
+      "blockedInChat": {
+        "tooltip": "{reason, select, incognito {{tool} n'est pas disponible en mode incognito} anonymous {Connectez-vous pour utiliser {tool}} multiModel {{tool} n'est pas disponible lorsque vous comparez des modèles} other {{tool} n'est pas disponible dans cette discussion}}"
       },
       "configure": {
         "tooltip": "Configurer"
@@ -776,6 +776,9 @@
       },
       "codingAgent": {
         "label": "Agent de code"
+      },
+      "sandbox": {
+        "label": "Bac à sable"
       }
     },
     "toolsPopover": {
@@ -851,6 +854,9 @@
         },
         "webSearch": {
           "description": "Recherche sur le web des informations à jour."
+        },
+        "sandbox": {
+          "description": "Exécutez des commandes shell et modifiez des fichiers dans un bac à sable Linux privé."
         }
       }
     },
@@ -2459,6 +2465,10 @@
         "webSearch": {
           "description": "Recherchez sur le web des informations en temps réel et des résultats à jour.",
           "title": "Recherche web"
+        },
+        "sandbox": {
+          "description": "Exécutez des commandes shell et modifiez des fichiers dans un bac à sable Linux privé.",
+          "title": "Bac à sable"
         }
       }
     },
@@ -11286,6 +11296,10 @@
         "webSearch": {
           "description": "Recherchez sur le Web des informations en temps réel et des résultats à jour.",
           "title": "Recherche Web"
+        },
+        "sandbox": {
+          "description": "Exécutez des commandes shell et modifiez des fichiers dans un bac à sable Linux privé.",
+          "title": "Bac à sable"
         }
       },
       "advanced": {
@@ -13102,6 +13116,12 @@
           },
           "waitingForApproval": {
             "label": "En attente de votre approbation"
+          },
+          "runningCommand": {
+            "label": "Exécution de la commande"
+          },
+          "editingFiles": {
+            "label": "Modification des fichiers"
           }
         },
         "internalSearch": {
@@ -13231,11 +13251,54 @@
           "researchAgent": "Agent de recherche",
           "thinking": "Réflexion",
           "tool": "Outil",
-          "webSearch": "Recherche web"
+          "webSearch": "Recherche web",
+          "terminal": "Terminal",
+          "applyPatch": "Appliquer le correctif"
         },
         "webSearch": {
           "searching": {
             "status": "Recherche sur le web"
+          }
+        },
+        "sandbox": {
+          "exec": {
+            "status": "{phase, select, running {Exécution de la commande} started {Commande lancée} failed {Échec de la commande} done {Commande exécutée} other {Commande exécutée}}",
+            "workdir": {
+              "label": "Dans {workdir}"
+            }
+          },
+          "stdin": {
+            "status": "{kind, select, send {{phase, select, running {Envoi de la saisie à la session {sessionId}} failed {Impossible d'envoyer la saisie à la session {sessionId}} done {Saisie envoyée à la session {sessionId}} other {Saisie envoyée à la session {sessionId}}}} check {{phase, select, running {Vérification de la session {sessionId}} failed {Impossible de vérifier la session {sessionId}} done {Session {sessionId} vérifiée} other {Session {sessionId} vérifiée}}} other {Session {sessionId}}}"
+          },
+          "output": {
+            "title": "Sortie"
+          },
+          "exitCode": {
+            "label": "Code de sortie {exitCode}"
+          },
+          "completion": {
+            "label": "{completion, select, signaled {Arrêté par un signal} canceled {Annulé} deadline_exceeded {Arrêté à sa limite de temps} other {Terminé}}"
+          },
+          "stillRunning": {
+            "label": "Toujours en cours (session {sessionId})"
+          },
+          "truncated": {
+            "label": "Sortie tronquée"
+          },
+          "noOutput": {
+            "text": "Aucune sortie"
+          },
+          "patch": {
+            "edited": {
+              "status": "{count, plural, one {# fichier modifié} other {# fichiers modifiés}}"
+            },
+            "failed": {
+              "status": "Échec du correctif"
+            },
+            "title": "Correctif"
+          },
+          "stopped": {
+            "status": "Arrêté"
           }
         }
       },

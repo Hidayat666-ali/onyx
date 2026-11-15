@@ -302,7 +302,10 @@ A group closes on its own parent-level `SECTION_END` or `ERROR`
 (`app/app/message/messageComponents/timeline/packetHelpers.ts:isGroupEndPacket`,
 shared by `isToolComplete` and the packet processor); a new `turn_index` or a
 stop packet adds a parent-level `SECTION_END` to each open group. A stop
-packet also ends each open nested call, because no packet follows it. Parallel
+packet also ends each open nested call, because no packet follows it. A code
+mode final delta with any status but `running` ends the open nested calls of
+its group the same way: the backend sends no end packet for a call that the
+cell's end cut off, so the call renders as stopped. Parallel
 tools share a `turn_index` and differ by `tab_index`. The child packets of a
 subagent, a coding agent (its bash calls and thinking) or a code mode program
 carry the parent's key plus `sub_turn_index`, so they join the parent group,
@@ -502,6 +505,11 @@ so another browser starts again. The input lock is a comparison against
 preserves the selected preference for later messages in that chat. Each request
 sends the current eligible selection, except Deep Research requests send no
 preference. A preference does not restrict which available tools may run.
+`web/src/lib/plugins/chat.ts:chatToolBlock` names the built-in tools that the
+backend drops from a turn: the coding agent in incognito, and the Sandbox tool in
+incognito, for anonymous users and when several models answer. The preference
+skips such a tool, and its row in the tools popover is disabled with a tooltip
+that names the reason.
 [[plugins]] owns Action availability.
 
 **The development `/api` proxy.**

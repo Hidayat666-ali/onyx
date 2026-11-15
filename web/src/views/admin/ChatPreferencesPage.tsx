@@ -58,6 +58,7 @@ import {
   PYTHON_TOOL_ID,
   OPEN_URL_TOOL_ID,
   CODING_AGENT_TOOL_ID,
+  EXEC_COMMAND_TOOL_ID,
 } from "@/lib/tools/constants";
 import {
   EmptyMessageCard,
@@ -679,6 +680,9 @@ export default function ChatPreferencesPage() {
   const codingAgentTool = availableTools.find(
     (t) => t.in_code_tool_id === CODING_AGENT_TOOL_ID
   );
+  const sandboxTool = availableTools.find(
+    (t) => t.in_code_tool_id === EXEC_COMMAND_TOOL_ID
+  );
 
   // Connectors
   const { ccPairs } = useCCPairs();
@@ -1122,6 +1126,30 @@ export default function ChatPreferencesPage() {
                                 void toggleTool(codingAgentTool.id, checked)
                               }
                               disabled={!codingAgentTool}
+                            />
+                          </InputHorizontal>
+                        </Card>
+                      </Disabled>
+
+                      <Disabled disabled={!sandboxTool}>
+                        <Card border="solid" rounding={4}>
+                          <InputHorizontal
+                            title={t("tools.sandbox.title")}
+                            description={t("tools.sandbox.description")}
+                            disabled={!sandboxTool}
+                            withLabel
+                          >
+                            <InputSwitch
+                              checked={
+                                sandboxTool
+                                  ? isToolEnabled(sandboxTool.id)
+                                  : false
+                              }
+                              onCheckedChange={(checked) =>
+                                sandboxTool &&
+                                void toggleTool(sandboxTool.id, checked)
+                              }
+                              disabled={!sandboxTool}
                             />
                           </InputHorizontal>
                         </Card>

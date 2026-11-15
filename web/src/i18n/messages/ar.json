@@ -122,8 +122,8 @@
       "authenticate": {
         "label": "مصادقة"
       },
-      "codingAgentIncognito": {
-        "tooltip": "وكيل البرمجة غير متاح في وضع التخفي"
+      "blockedInChat": {
+        "tooltip": "{reason, select, incognito {{tool} غير متاح في وضع التخفي} anonymous {سجّل الدخول لاستخدام {tool}} multiModel {{tool} غير متاح عند مقارنة النماذج} other {{tool} غير متاح في هذه المحادثة}}"
       },
       "configure": {
         "tooltip": "تكوين"
@@ -776,6 +776,9 @@
       },
       "codingAgent": {
         "label": "وكيل البرمجة"
+      },
+      "sandbox": {
+        "label": "صندوق الحماية"
       }
     },
     "toolsPopover": {
@@ -851,6 +854,9 @@
         },
         "webSearch": {
           "description": "ابحث في الويب عن معلومات محدّثة."
+        },
+        "sandbox": {
+          "description": "شغّل أوامر الطرفية وعدّل الملفات في صندوق حماية Linux خاص."
         }
       }
     },
@@ -2459,6 +2465,10 @@
         "webSearch": {
           "description": "البحث في الويب عن معلومات آنية ونتائج محدّثة.",
           "title": "البحث في الويب"
+        },
+        "sandbox": {
+          "description": "شغّل أوامر الطرفية وعدّل الملفات في صندوق حماية Linux خاص.",
+          "title": "صندوق الحماية"
         }
       }
     },
@@ -11286,6 +11296,10 @@
         "webSearch": {
           "description": "ابحث في الويب عن معلومات فورية ونتائج محدثة.",
           "title": "البحث على الويب"
+        },
+        "sandbox": {
+          "description": "شغّل أوامر الطرفية وعدّل الملفات في صندوق حماية Linux خاص.",
+          "title": "صندوق الحماية"
         }
       },
       "advanced": {
@@ -13102,6 +13116,12 @@
           },
           "waitingForApproval": {
             "label": "في انتظار موافقتك"
+          },
+          "runningCommand": {
+            "label": "جارٍ تشغيل الأمر"
+          },
+          "editingFiles": {
+            "label": "جارٍ تعديل الملفات"
           }
         },
         "internalSearch": {
@@ -13231,11 +13251,54 @@
           "researchAgent": "وكيل البحث",
           "thinking": "التفكير",
           "tool": "أداة",
-          "webSearch": "البحث في الويب"
+          "webSearch": "البحث في الويب",
+          "terminal": "الطرفية",
+          "applyPatch": "تطبيق التصحيح"
         },
         "webSearch": {
           "searching": {
             "status": "جارٍ البحث في الويب"
+          }
+        },
+        "sandbox": {
+          "exec": {
+            "status": "{phase, select, running {جارٍ تشغيل الأمر} started {تم بدء الأمر} failed {فشل الأمر} done {تم تشغيل الأمر} other {تم تشغيل الأمر}}",
+            "workdir": {
+              "label": "في {workdir}"
+            }
+          },
+          "stdin": {
+            "status": "{kind, select, send {{phase, select, running {جارٍ إرسال إدخال إلى الجلسة {sessionId}} failed {تعذر إرسال إدخال إلى الجلسة {sessionId}} done {تم إرسال إدخال إلى الجلسة {sessionId}} other {تم إرسال إدخال إلى الجلسة {sessionId}}}} check {{phase, select, running {جارٍ فحص الجلسة {sessionId}} failed {تعذر فحص الجلسة {sessionId}} done {تم فحص الجلسة {sessionId}} other {تم فحص الجلسة {sessionId}}}} other {الجلسة {sessionId}}}"
+          },
+          "output": {
+            "title": "المخرجات"
+          },
+          "exitCode": {
+            "label": "رمز الخروج {exitCode}"
+          },
+          "completion": {
+            "label": "{completion, select, signaled {أُوقف بإشارة} canceled {أُلغي} deadline_exceeded {أُوقف عند حده الزمني} other {انتهى}}"
+          },
+          "stillRunning": {
+            "label": "لا يزال قيد التشغيل (الجلسة {sessionId})"
+          },
+          "truncated": {
+            "label": "تم اقتطاع المخرجات"
+          },
+          "noOutput": {
+            "text": "لا توجد مخرجات"
+          },
+          "patch": {
+            "edited": {
+              "status": "{count, plural, zero {لم يتم تعديل أي ملف} one {تم تعديل ملف واحد} two {تم تعديل ملفين} few {تم تعديل # ملفات} many {تم تعديل # ملفًا} other {تم تعديل # ملف}}"
+            },
+            "failed": {
+              "status": "فشل التصحيح"
+            },
+            "title": "التصحيح"
+          },
+          "stopped": {
+            "status": "تم الإيقاف"
           }
         }
       },

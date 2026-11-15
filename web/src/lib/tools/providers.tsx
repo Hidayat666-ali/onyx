@@ -27,6 +27,8 @@ interface ToolsPopoverInputs {
    * `useToolConfiguration` would hold its own state and never reach the send.
    */
   toolConfiguration: ToolConfigurationHandle;
+  /** Several models answer the next message, which blocks some tools. */
+  multiModel: boolean;
   /** Drills the popover into its sources sub-view. */
   openSources: () => void;
   /** Dismisses the popover. */
@@ -70,6 +72,7 @@ export interface ToolsPopoverValue extends ToolsPopoverInputs {
 function useToolsPopoverState({
   agent,
   toolConfiguration,
+  multiModel,
   openSources,
   close,
 }: ToolsPopoverInputs): ToolsPopoverValue {
@@ -149,6 +152,7 @@ function useToolsPopoverState({
     () => ({
       agent,
       toolConfiguration,
+      multiModel,
       openSources,
       close,
       configuredSources,
@@ -171,6 +175,7 @@ function useToolsPopoverState({
       enableAllSources,
       enabledSourceCount,
       isSourceEnabled,
+      multiModel,
       openSources,
       toggleEnabled,
       togglePreferred,

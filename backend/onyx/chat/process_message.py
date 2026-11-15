@@ -28,7 +28,12 @@ from onyx.chat.chat_utils import (
     is_last_assistant_message_clarification,
 )
 from onyx.chat.errors import chat_error
-from onyx.chat.execution import chat_turn_work, host_agent_work, start_chat_turn
+from onyx.chat.execution import (
+    chat_turn_work,
+    host_agent_work,
+    start_chat_turn,
+    unavailable_turn_tools,
+)
 from onyx.chat.files import (
     collect_available_file_ids,
     convert_loaded_files_to_chat_files,
@@ -77,6 +82,7 @@ from onyx.configs.constants import (
 )
 from onyx.db.chat import (
     checkpoint_from_summary,
+    count_turn_responses,
     create_new_chat_message,
     find_summary_for_branch,
     get_chat_session_by_id,
@@ -146,7 +152,6 @@ from onyx.server.query_and_chat.token_limit import (
 from onyx.server.usage_limits import check_llm_cost_limit_for_provider
 from onyx.skills.chat import accept_picked_skills, render_skills_catalog
 from onyx.tools.constants import (
-    CODING_AGENT_TOOL_ID,
     FILE_READER_TOOL_ID,
     SEARCH_TOOL_ID,
 )
@@ -520,20 +525,26 @@ def prepare_chat_turn(
                         OnyxErrorCode.BAD_REQUEST,
                         "Deep research requires a model with at least 50,000 input tokens",
                     )
-            if (
-                chat_session.incognito_record_mode is not None
-                and new_msg_req.preferred_tool_id is not None
-                and any(
-                    tool.id == new_msg_req.preferred_tool_id
-                    and tool.in_code_tool_id == CODING_AGENT_TOOL_ID
-                    for tool in chat_session.persona.tools
-                )
-            ):
-                # Incognito offers no coding agent; reject before the question is saved.
-                raise OnyxError(
-                    OnyxErrorCode.BAD_REQUEST,
-                    "The Coding Agent is not available in incognito. Start a normal chat to use it.",
-                )
+            unavailable_tools = unavailable_turn_tools(
+                anonymous=user.is_anonymous,
+                incognito=chat_session.incognito_record_mode is not None,
+                # A continued response is one of its turn's saved responses.
+                multi_model=count_turn_responses(db_session, response_ids[0]) > 1
+                if resumed_response_id is not None or agent_host
+                else len(selected_models) > 1,
+            )
+            if new_msg_req.preferred_tool_id is not None:
+                # Reject a forced tool that the turn drops before the question
+                # is saved.
+                for tool in chat_session.persona.tools:
+                    if (
+                        tool.id == new_msg_req.preferred_tool_id
+                        and tool.in_code_tool_id in unavailable_tools
+                    ):
+                        raise OnyxError(
+                            OnyxErrorCode.BAD_REQUEST,
+                            unavailable_tools[tool.in_code_tool_id],
+                        )
             # One read serves the catalog's context reservation and the skills
             # that an accepted question picked.
             chat_skills = list_chat_skills(db_session, user)
@@ -877,6 +888,7 @@ def prepare_chat_turn(
             persona=persona_prompt,
             base_system_prompt=base_system_prompt,
             tool_configuration=tool_configuration,
+            unavailable_tools=unavailable_tools,
             research_tool_id=research_tool_id,
             checkpoint=checkpoint,
             user_message_id=user_message_id,

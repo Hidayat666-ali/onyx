@@ -122,8 +122,8 @@
       "authenticate": {
         "label": "Autenticar"
       },
-      "codingAgentIncognito": {
-        "tooltip": "O agente de código não está disponível no modo anônimo"
+      "blockedInChat": {
+        "tooltip": "{reason, select, incognito {{tool} não está disponível no modo anônimo} anonymous {Faça login para usar {tool}} multiModel {{tool} não está disponível ao comparar modelos} other {{tool} não está disponível neste chat}}"
       },
       "configure": {
         "tooltip": "Configurar"
@@ -776,6 +776,9 @@
       },
       "codingAgent": {
         "label": "Agente de código"
+      },
+      "sandbox": {
+        "label": "Sandbox"
       }
     },
     "toolsPopover": {
@@ -851,6 +854,9 @@
         },
         "webSearch": {
           "description": "Pesquise na web informações atualizadas."
+        },
+        "sandbox": {
+          "description": "Execute comandos de shell e edite arquivos em um sandbox Linux privado."
         }
       }
     },
@@ -2459,6 +2465,10 @@
         "webSearch": {
           "description": "Pesquisa na web para obter informações em tempo real e resultados atualizados.",
           "title": "Pesquisa na web"
+        },
+        "sandbox": {
+          "description": "Execute comandos de shell e edite arquivos em um sandbox Linux privado.",
+          "title": "Sandbox"
         }
       }
     },
@@ -11286,6 +11296,10 @@
         "webSearch": {
           "description": "Pesquise na web informações em tempo real e resultados atualizados.",
           "title": "Pesquisa na web"
+        },
+        "sandbox": {
+          "description": "Execute comandos de shell e edite arquivos em um sandbox Linux privado.",
+          "title": "Sandbox"
         }
       },
       "advanced": {
@@ -13102,6 +13116,12 @@
           },
           "waitingForApproval": {
             "label": "Aguardando sua aprovação"
+          },
+          "runningCommand": {
+            "label": "Executando comando"
+          },
+          "editingFiles": {
+            "label": "Editando arquivos"
           }
         },
         "internalSearch": {
@@ -13231,11 +13251,54 @@
           "researchAgent": "Agente de pesquisa",
           "thinking": "Pensando",
           "tool": "Ferramenta",
-          "webSearch": "Pesquisa na web"
+          "webSearch": "Pesquisa na web",
+          "terminal": "Terminal",
+          "applyPatch": "Aplicar patch"
         },
         "webSearch": {
           "searching": {
             "status": "Pesquisando na web"
+          }
+        },
+        "sandbox": {
+          "exec": {
+            "status": "{phase, select, running {Executando comando} started {Comando iniciado} failed {O comando falhou} done {Comando executado} other {Comando executado}}",
+            "workdir": {
+              "label": "Em {workdir}"
+            }
+          },
+          "stdin": {
+            "status": "{kind, select, send {{phase, select, running {Enviando entrada para a sessão {sessionId}} failed {Não foi possível enviar a entrada para a sessão {sessionId}} done {Entrada enviada para a sessão {sessionId}} other {Entrada enviada para a sessão {sessionId}}}} check {{phase, select, running {Verificando a sessão {sessionId}} failed {Não foi possível verificar a sessão {sessionId}} done {Sessão {sessionId} verificada} other {Sessão {sessionId} verificada}}} other {Sessão {sessionId}}}"
+          },
+          "output": {
+            "title": "Saída"
+          },
+          "exitCode": {
+            "label": "Código de saída {exitCode}"
+          },
+          "completion": {
+            "label": "{completion, select, signaled {Interrompido por um sinal} canceled {Cancelado} deadline_exceeded {Interrompido no limite de tempo} other {Encerrado}}"
+          },
+          "stillRunning": {
+            "label": "Ainda em execução (sessão {sessionId})"
+          },
+          "truncated": {
+            "label": "Saída truncada"
+          },
+          "noOutput": {
+            "text": "Sem saída"
+          },
+          "patch": {
+            "edited": {
+              "status": "{count, plural, one {# arquivo editado} other {# arquivos editados}}"
+            },
+            "failed": {
+              "status": "O patch falhou"
+            },
+            "title": "Patch"
+          },
+          "stopped": {
+            "status": "Interrompido"
           }
         }
       },

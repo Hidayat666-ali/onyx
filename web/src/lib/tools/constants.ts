@@ -25,6 +25,8 @@ export const FILE_READER_TOOL_ID = "FileReaderTool";
 export const CODING_AGENT_TOOL_ID = "CodingAgentTool";
 export const KNOWLEDGE_GRAPH_TOOL_ID = "KnowledgeGraphTool";
 export const MEMORY_TOOL_ID = "MemoryTool";
+// One row builds the sandbox tools: exec_command, write_stdin and apply_patch
+export const EXEC_COMMAND_TOOL_ID = "ExecCommandTool";
 
 // Icon mappings for system tools
 export const SYSTEM_TOOL_ICONS: Record<
@@ -37,6 +39,7 @@ export const SYSTEM_TOOL_ICONS: Record<
   [PYTHON_TOOL_ID]: SvgTerminal,
   [OPEN_URL_TOOL_ID]: SvgLink,
   [CODING_AGENT_TOOL_ID]: SvgCpu,
+  [EXEC_COMMAND_TOOL_ID]: SvgTerminal,
 };
 
 import { ADMIN_ROUTES } from "@/lib/admin-routes";

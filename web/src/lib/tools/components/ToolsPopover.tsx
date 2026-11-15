@@ -38,12 +38,15 @@ import { chatPluginsForAgent, setChatPluginEnabled } from "@/lib/plugins/chat";
 export interface ToolsPopoverProps {
   agent: MinimalAgent;
   toolConfiguration: ToolConfigurationHandle;
+  /** Several models answer the next message. */
+  multiModel?: boolean;
   disabled?: boolean;
 }
 
 export default function ToolsPopover({
   agent,
   toolConfiguration,
+  multiModel = false,
   disabled = false,
 }: ToolsPopoverProps) {
   const t = useTranslations("actions");
@@ -117,6 +120,7 @@ export default function ToolsPopover({
     <ToolsPopoverProvider
       agent={agent}
       toolConfiguration={toolConfiguration}
+      multiModel={multiModel}
       openSources={openSources}
       close={close}
     >

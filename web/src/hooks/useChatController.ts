@@ -85,6 +85,7 @@ import {
 import type { MemberPlugin } from "@/lib/plugins/member";
 import { ProjectFile, useProjectsContext } from "@/lib/projects/providers";
 import { useIncognito } from "@/providers/IncognitoProvider";
+import { useUser } from "@/providers/UserProvider";
 import { projectFilesToFileDescriptors } from "@/lib/projects/utils";
 import {
   claimStreamReader,
@@ -168,6 +169,7 @@ export default function useChatController({
   const { fetchProjects, setCurrentMessageFiles, beginUpload } =
     useProjectsContext();
   const { incognitoEnabledRef, incognitoSessionId } = useIncognito();
+  const { user } = useUser();
 
   // Use selectors to access only the specific fields we need
   const currentSessionId = useChatSessionStore(
@@ -1070,7 +1072,11 @@ export default function useChatController({
               requestedToolId: toolConfiguration.preferredToolId,
               agent: activeAgent,
               plugins: memberPlugins ?? [],
-              incognito,
+              conditions: {
+                incognito,
+                anonymous: user?.is_anonymous_user ?? false,
+                multiModel: isMultiModel,
+              },
             });
 
         // Determine origin for telemetry tracking (also used for frontend PostHog tracking below)
@@ -1589,6 +1595,7 @@ export default function useChatController({
       // Others that affect logic
       activeAgent,
       memberPlugins,
+      user,
       availableAgents,
       existingChatSessionId,
       selectedDocuments,

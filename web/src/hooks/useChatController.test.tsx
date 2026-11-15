@@ -77,6 +77,9 @@ jest.mock("@/providers/IncognitoProvider", () => ({
     incognitoSessionId: null,
   }),
 }));
+jest.mock("@/providers/UserProvider", () => ({
+  useUser: () => ({ user: null }),
+}));
 jest.mock("@/app/app/services/lib", () => {
   class ChatSendRejectedError extends Error {}
   return {

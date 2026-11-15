@@ -5,34 +5,65 @@ import type { ChatPluginReference } from "@/lib/plugins/types";
 import type { ToolConfigurationHandle } from "@/lib/tools/hooks";
 import type { ToolSnapshot } from "@/lib/tools/types";
 import { DEFAULT_AGENT_ID } from "@/lib/constants";
-import { CODING_AGENT_TOOL_ID } from "@/lib/tools/constants";
+import {
+  CODING_AGENT_TOOL_ID,
+  EXEC_COMMAND_TOOL_ID,
+} from "@/lib/tools/constants";
 
 export interface ChatPlugin {
   plugin: Exclude<MemberPlugin, { kind: "external-app" }>;
   toolIds: number[];
 }
 
-/** Incognito chats run no child agents, so the coding agent is unavailable. */
-export function isBlockedInIncognito(
+/** Chat conditions under which the backend drops some built-in tools from a turn. */
+export interface ChatToolConditions {
+  incognito: boolean;
+  /** The user is not signed in. */
+  anonymous: boolean;
+  /** Several models answer the next message. */
+  multiModel: boolean;
+}
+
+export type ChatToolBlock = keyof ChatToolConditions;
+
+const NO_CHAT_TOOL_CONDITIONS: ChatToolConditions = {
+  incognito: false,
+  anonymous: false,
+  multiModel: false,
+};
+
+// Incognito chats run no child agents and keep no sandbox. A sandbox belongs
+// to one signed-in user, and two models must not edit one workspace at once.
+const CHAT_TOOL_BLOCKS: Partial<Record<string, readonly ChatToolBlock[]>> = {
+  [CODING_AGENT_TOOL_ID]: ["incognito"],
+  [EXEC_COMMAND_TOOL_ID]: ["incognito", "anonymous", "multiModel"],
+};
+
+/** Why the backend drops this tool from the chat's next turn, or null when the tool can run. */
+export function chatToolBlock(
   tool: Pick<ToolSnapshot, "in_code_tool_id">,
-  incognito: boolean
-): boolean {
-  return incognito && tool.in_code_tool_id === CODING_AGENT_TOOL_ID;
+  conditions: ChatToolConditions
+): ChatToolBlock | null {
+  return (
+    CHAT_TOOL_BLOCKS[tool.in_code_tool_id ?? ""]?.find(
+      (block) => conditions[block]
+    ) ?? null
+  );
 }
 
 export function effectiveChatPreferredToolId({
   requestedToolId,
   agent,
   plugins,
-  incognito = false,
+  conditions = NO_CHAT_TOOL_CONDITIONS,
 }: {
   requestedToolId: number | null;
   agent: Pick<MinimalAgent, "id" | "tools"> | undefined;
   plugins: readonly MemberPlugin[];
-  incognito?: boolean;
+  conditions?: ChatToolConditions;
 }): number | null {
   const tool = agent?.tools.find((entry) => entry.id === requestedToolId);
-  if (!tool || isBlockedInIncognito(tool, incognito)) return null;
+  if (!tool || chatToolBlock(tool, conditions) !== null) return null;
   if (agent?.id === DEFAULT_AGENT_ID && !tool.in_code_tool_id) {
     const available = plugins.some((plugin) => {
       switch (plugin.kind) {

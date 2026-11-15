@@ -13,6 +13,7 @@ import {
 } from "@/lib/settings/types";
 import { SWR_KEYS } from "@/lib/swr-keys";
 import { usePermissionAuthority } from "@/lib/permissions/hooks";
+import { EXEC_COMMAND_TOOL_ID } from "@/lib/tools/constants";
 
 jest.mock("@/lib/permissions/hooks", () => ({
   ...jest.requireActual<typeof import("@/lib/permissions/hooks")>(
@@ -176,6 +177,53 @@ describe("ChatPreferencesPage", () => {
     expect(
       screen.getByRole("link", { name: /Manage connectors/ })
     ).toHaveAttribute("href", "/admin/indexing-status");
+  });
+
+  test("turns the Sandbox tool on for default chat", async () => {
+    const user = setupUser();
+    const fetchMock = jest.mocked(global.fetch);
+    const baseFetch = fetchMock.getMockImplementation();
+    fetchMock.mockImplementation(async (input, init) => {
+      if (input === SWR_KEYS.tools) {
+        const sandbox = {
+          id: 42,
+          name: "exec_command",
+          display_name: "Sandbox",
+          description: "",
+          in_code_tool_id: EXEC_COMMAND_TOOL_ID,
+        };
+        return new Response(JSON.stringify([sandbox]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (input === "/api/admin/default-assistant/tools") {
+        return new Response(
+          JSON.stringify({
+            tool_ids: [42],
+            system_prompt: null,
+            default_system_prompt: "",
+          }),
+          { headers: { "Content-Type": "application/json" } }
+        );
+      }
+      return baseFetch!(input, init);
+    });
+
+    render(<ChatPreferencesPage />);
+
+    const toggle = await screen.findByRole("switch", { name: /Sandbox/ });
+    await waitFor(() => expect(toggle).toBeEnabled());
+    await user.click(toggle);
+
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/admin/default-assistant/tools",
+        expect.objectContaining({
+          method: "PATCH",
+          body: JSON.stringify({ tool_ids: [42], enabled: true }),
+        })
+      )
+    );
   });
 
   test("still saves a changed team name on blur", async () => {

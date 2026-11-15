@@ -58,10 +58,17 @@ from onyx.tools.tool_implementations.mcp.mcp_tool import MCPTool
 from onyx.tools.tool_implementations.memory.memory_tool import MemoryTool
 from onyx.tools.tool_implementations.open_url.open_url_tool import OpenURLTool
 from onyx.tools.tool_implementations.python.python_tool import PythonTool
+from onyx.tools.tool_implementations.sandbox.sandbox_tools import (
+    ApplyPatchTool,
+    ExecCommandTool,
+    WriteStdinTool,
+)
+from onyx.tools.tool_implementations.sandbox.turn import SandboxTurn
 from onyx.tools.tool_implementations.search.search_tool import SearchTool
 from onyx.tools.tool_implementations.web_search.web_search_tool import WebSearchTool
 from onyx.utils.headers import header_dict_to_header_list
 from onyx.utils.logger import setup_logger
+from shared_configs.contextvars import get_current_tenant_id
 
 logger = setup_logger()
 
@@ -410,6 +417,21 @@ def _construct_tools_impl(
                         tool_id=db_tool_model.id,
                         llm=llm,
                     )
+                ]
+
+            # One row builds the three sandbox tools, which share the turn.
+            elif tool_cls.__name__ == ExecCommandTool.__name__:
+                turn = SandboxTurn(
+                    tenant_id=get_current_tenant_id(),
+                    user_id=user.id,
+                    chat_session_id=_require_chat_session_id(
+                        custom_tool_config, ExecCommandTool.__name__
+                    ),
+                )
+                tool_dict[db_tool_model.id] = [
+                    ExecCommandTool(db_tool_model.id, turn),
+                    WriteStdinTool(db_tool_model.id, turn),
+                    ApplyPatchTool(db_tool_model.id, turn),
                 ]
 
             # Handle File Reader Tool

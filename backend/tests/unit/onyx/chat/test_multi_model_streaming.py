@@ -402,6 +402,7 @@ def _make_setup(n_models: int = 1) -> MagicMock:
             )
         )
     setup.incognito_record_mode = None
+    setup.unavailable_tools = {}
     setup.mentions = []
     setup.has_chat_skills = False
     setup.resumed_response_id = None
@@ -433,6 +434,7 @@ def _make_setup(n_models: int = 1) -> MagicMock:
     setup.mcp_headers = None
     setup.litellm_additional_headers = None
     setup.incognito_record_mode = None
+    setup.unavailable_tools = {}
     return setup
 
 
@@ -548,6 +550,7 @@ class TestRunModels:
 
     @pytest.mark.parametrize("incognito", [False, True])
     def test_incognito_turns_offer_no_coding_agent(self, incognito: bool) -> None:
+        from onyx.chat.execution import unavailable_turn_tools
         from onyx.db.enums import IncognitoRecordMode
         from onyx.tools.constants import CODING_AGENT_TOOL_ID
         from onyx.tools.models import PersonaToolConfiguration, ToolConfiguration
@@ -573,6 +576,9 @@ class TestRunModels:
         setup = _make_setup(n_models=1)
         setup.incognito_record_mode = (
             IncognitoRecordMode.FULL_HISTORY if incognito else None
+        )
+        setup.unavailable_tools = unavailable_turn_tools(
+            anonymous=False, incognito=incognito, multi_model=False
         )
         setup.tool_configuration = PersonaToolConfiguration.model_construct(
             persona_id=0,
